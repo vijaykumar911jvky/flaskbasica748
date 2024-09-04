@@ -1,0 +1,48 @@
+name: Trigger auto deployment for container-app-edxs2l2atnhm2
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/container-app-edxs2l2atnhm2-AutoDeployTrigger-362ec9c1-df4e-4dc9-90d9-62aecc8b53bc.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.CONTAINERAPPEDXS2L2ATNHM2_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CONTAINERAPPEDXS2L2ATNHM2_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.CONTAINERAPPEDXS2L2ATNHM2_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: defaultacrcontainerregistry9da1.azurecr.io
+          registryUsername: ${{ secrets.CONTAINERAPPEDXS2L2ATNHM2_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CONTAINERAPPEDXS2L2ATNHM2_REGISTRY_PASSWORD }}
+          containerAppName: container-app-edxs2l2atnhm2
+          resourceGroup: flaskbasica748818f
+          imageToBuild: defaultacrcontainerregistry9da1.azurecr.io/container-app-edxs2l2atnhm2:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
